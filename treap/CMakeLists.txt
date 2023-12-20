@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.14)
+
 project(treap)
 
 set(CMAKE_CXX_STANDARD 20)
@@ -17,10 +18,24 @@ add_executable(
   node_test
   test/node_test.cc
 )
+
+add_executable(
+  treap_test
+  test/treap_test.cc
+)
+
 target_link_libraries(
   node_test
   GTest::gtest_main
 )
 
+target_link_libraries(
+  treap_test
+  GTest::gtest_main
+)
+
 include(GoogleTest)
+
 gtest_discover_tests(node_test)
+gtest_discover_tests(treap_test)
+

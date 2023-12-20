@@ -6,6 +6,9 @@ test: build
 test-node: build
 	docker run -it treap ./build/node_test
 
+test-treap: build
+	docker run -it treap ./build/treap_test
+
 build:
 	docker build . --tag "treap"
 
