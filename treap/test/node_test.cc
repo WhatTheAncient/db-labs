@@ -1,6 +1,6 @@
 #include <string>
 #include "gtest/gtest.h"
-#include "../src/node.hpp"
+#include "../src/treap/node.hpp"
 
 TEST(Node, DefaultConstructorWithIntegralType) {
   auto defaultNode = treap::Node<uint32_t, std::string>();

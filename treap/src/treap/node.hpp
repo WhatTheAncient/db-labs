@@ -47,15 +47,15 @@ namespace treap {
       /**
        * @brief Default move constructor
        */
-      /// Node(Node&& other) = default;
+      Node(Node&& other) = default;
       /**
        * @brief Disabled assignment operator
        */
-      Node& operator=(const Node& other) = delete;
+      Node& operator=(const Node& other) noexcept = delete;
       /**
        * @brief Default move assignment operator
       */
-      Node& operator=(Node&& other) = default;
+      Node& operator=(Node&& other) noexcept = default;
       /**
        * @brief Default Node destructor
        */
@@ -64,6 +64,7 @@ namespace treap {
       C getKey() const noexcept { return this->key; };
       C getPriority() const noexcept { return this->priority; };
       T getData() const noexcept { return this->data; };
+      NodePtr<C, T> getParent() const noexcept { return this->parent; };
 
       NodePtr<C, T> ptr() { return this->shared_from_this(); };
       
