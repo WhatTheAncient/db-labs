@@ -68,8 +68,8 @@ namespace treap {
 
       NodePtr<C, T> ptr() { return this->shared_from_this(); };
       
-      bool hasLessPriorityThan(const Node* other) const;
-      bool hasGreaterPriorityThan(const Node* other) const;
+      bool hasLessPriorityThan(const Node<C, T> &other) const;
+      bool hasGreaterPriorityThan(const Node<C, T> &other) const;
 
       /**
        * @brief Spaceship operator overload (with by-key comparation)
@@ -125,12 +125,12 @@ namespace treap {
   };
 
   template <typename C, typename T>
-  bool Node<C, T>::hasLessPriorityThan(const Node<C, T>* other) const {
-    return std::less<C>{}(this->getPriority(), other->getPriority());
+  bool Node<C, T>::hasLessPriorityThan(const Node<C, T> &other) const {
+    return std::less<C>{}(this->getPriority(), other.getPriority());
   };
 
   template <typename C, typename T>
-  bool Node<C, T>::hasGreaterPriorityThan(const Node<C, T>* other) const {
-    return std::greater<C>{}(this->getPriority(), other->getPriority());
+  bool Node<C, T>::hasGreaterPriorityThan(const Node<C, T> &other) const {
+    return std::greater<C>{}(this->getPriority(), other.getPriority());
   };
 }

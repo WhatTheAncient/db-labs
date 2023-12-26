@@ -15,27 +15,16 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(googletest)
 
 add_executable(
-  node_test
-  test/node_test.cc
-)
-
-add_executable(
-  treap_test
-  test/treap_test.cc
+  tests
+  test/main.cpp
 )
 
 target_link_libraries(
-  node_test
-  GTest::gtest_main
-)
-
-target_link_libraries(
-  treap_test
+  tests
   GTest::gtest_main
 )
 
 include(GoogleTest)
 
-gtest_discover_tests(node_test)
-gtest_discover_tests(treap_test)
+gtest_discover_tests(tests)
 
