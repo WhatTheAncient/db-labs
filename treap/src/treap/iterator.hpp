@@ -26,6 +26,8 @@ namespace treap {
 
       Iterator(reference r) {
         auto left = std::make_shared<rut::Treap<C, T>>(r);
+        // If we got blank root in beginning then whole treap is empty.
+        if (r.getRoot() == nullptr) left = nullptr;
 
         while(left != nullptr) {
           iter.push(left);
@@ -87,7 +89,6 @@ namespace treap {
 
         return unchanged;
       }
-
 
       bool operator==(Iterator<C, T> const &other) const {  return current == other.current; }
       bool operator!=(Iterator<C, T> const &other) const {  return current != other.current; }

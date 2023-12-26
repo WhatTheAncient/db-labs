@@ -43,6 +43,13 @@ namespace rut {
       void setLeftSubTreap(TreapPtr<C, T> treap) { this->subTreaps.first = treap; };
       void setRightSubTreap(TreapPtr<C, T> treap) { this->subTreaps.second = treap; };
 
+      /**
+       * @brief Same as public Split method, but more eligible fore some cases.
+       * 
+       * @param treap 
+       * @param separator 
+       * @return SubTreaps<C, T> 
+       */
       friend SubTreaps<C, T> split(TreapPtr<C, T> treap, C separator) {
         if (treap == nullptr || treap->getRoot() == nullptr) return {nullptr, nullptr};
 
@@ -60,11 +67,18 @@ namespace rut {
         }
       };
 
+      /**
+       * @brief Same as public Merge method, but more eligible for some cases.
+       * 
+       * @param l 
+       * @param r 
+       * @return TreapPtr<C, T> 
+       */
       friend TreapPtr<C, T> merge(TreapPtr<C, T> l, TreapPtr<C, T> r) {
         if (l == nullptr || l->getRoot() == nullptr) return r;
         if (r == nullptr || r->getRoot() == nullptr) return l;
 
-        if (std::greater<C>{}(l->getRoot()->getPriority(), r->getRoot()->getPriority())) {
+        if (l->getRoot()->hasGreaterPriorityThan(*r->getRoot())) {
           auto newRight = merge(l->rightSubTreap(), r);
           l->setRightSubTreap(newRight);
 
@@ -86,12 +100,23 @@ namespace rut {
        */
       Treap();
 
+      /**
+       * @brief Construct a new Treap object as copy of the given Treap.
+       * 
+       * @param other 
+       */
       Treap(const Treap& other);
 
       treap::NodePtr<C, T> getRoot() const noexcept { return root; };
       TreapPtr<C, T> leftSubTreap() const noexcept { return subTreaps.first; };
       TreapPtr<C, T> rightSubTreap() const noexcept { return subTreaps.second; };
 
+      /**
+       * @brief Returns shared pointer of this object.
+       * @attention bad_weak_pointer error will be raised if there are no existing shared pointers.
+       * 
+       * @return TreapPtr<C, T> 
+       */
       TreapPtr<C, T> ptr() { return this->shared_from_this(); };
 
       /**
@@ -118,14 +143,60 @@ namespace rut {
        */
       void Insert(const C key, const C priority, const T data);
 
+      /**
+       * @brief Find node in treap by given key.
+       * 
+       * @param key 
+       * @return treap::NodePtr<C, T> - found node (or nullptr)
+       */
       treap::NodePtr<C, T> Find(const C key) const;
 
-      void Remove(const C key);
+      /**
+       * @brief Remove node from treap by given key.
+       * 
+       * @param key 
+       * @return true if Node was removed,
+       * @return false otherwise.
+       */
+      bool Remove(const C key);
 
+      /**
+       * @brief Returns vector of nodes in ordered traversal (by keys).
+       * 
+       * @return std::vector<treap::NodePtr<C, T>> - Vector of tree nodes.
+       */
       std::vector<treap::NodePtr<C, T>> inOrderedVector() const noexcept;
 
+      /**
+       * @brief Returns iterator for first node in InOrdered tree
+       * 
+       * @return treap::Iterator<C, T> 
+       */
       treap::Iterator<C, T> begin() const;
+      
+      /**
+       * @brief Returns iterator for last node in InOrdered tree
+       * 
+       * @return treap::Iterator<C, T> 
+       */
       treap::Iterator<C, T> end() const;
+
+      friend bool operator==(rut::Treap<C, T>& lha, rut::Treap<C, T>& rha) {      
+        auto lhaVector = lha.inOrderedVector();
+        auto rhaVector = rha.inOrderedVector();
+        
+        if (lhaVector.size() != rhaVector.size()) return false;
+
+        bool result = true;
+
+        for (size_t i = 0; i < lhaVector.size(); i++) {
+          result &= (lhaVector[i] == rhaVector[i]);
+        }
+
+        return result;
+      };
+
+      friend bool operator!=(rut::Treap<C, T>& lha, rut::Treap<C, T>& rha) { return !(lha == rha); };
   };
 
   template<typename C, typename T>
@@ -175,7 +246,7 @@ namespace rut {
     if (!other) return ptr();
     if (!root) return other->ptr();
 
-    if (std::greater<C>{}(root->getPriority(), other->root->getPriority())) {
+    if (getRoot()->hasGreaterPriorityThan(*other->getRoot())) {
       setRightSubTreap(rightSubTreap()->Merge(other));
 
       return ptr();
@@ -208,48 +279,60 @@ namespace rut {
 
   template <typename C, typename T>
   treap::NodePtr<C, T> Treap<C, T>::Find(const C key) const {
-    if (this->getRoot() == nullptr || this->getRoot()->getKey() == key) return this->getRoot();
+    if (this->getRoot() == nullptr) return nullptr;
+    if (this->getRoot()->getKey() == key) return this->getRoot();
 
-    if (std::greater{}(this->getRoot()->getKey(), key)) 
+    if (std::greater{}(this->getRoot()->getKey(), key)) {
+      if (!this->leftSubTreap()) return nullptr;
+
       return this->leftSubTreap()->Find(key);
-    else 
+    } else {
+      if (!this->rightSubTreap()) return nullptr;
+
       return this->rightSubTreap()->Find(key);
+    }
   }
 
   template <typename C, typename T>
-  void Treap<C, T>::Remove(const C key) {
+  bool Treap<C, T>::Remove(const C key) {
+    if (Find(key) == nullptr) return false;
+
     if (this->getRoot() == nullptr) {
-      std::cout << "Blank" << std::endl;
-      return;
+      return false;
     } 
 
     if (this->getRoot()->getKey() == key) {
       auto replace = merge(this->leftSubTreap(), this->rightSubTreap());
-      std::cout << "deletable" << replace << std::endl;
 
       if (replace == nullptr) {
-        this->setRoot(nullptr);
-        this->setLeftSubTreap(nullptr);
-        this->setRightSubTreap(nullptr);
+        return false;
       } else {
         this->setRoot(replace->getRoot());
         this->setLeftSubTreap(replace->leftSubTreap());
         this->setRightSubTreap(replace->rightSubTreap());
-      }
 
-      return;
+        return true;
+      }
     }
 
-    if (std::greater{}(this->getRoot()->getKey(), key)) 
-      return this->leftSubTreap()->Remove(key);
-    else 
+    if (std::greater{}(this->getRoot()->getKey(), key)) {
+      if (!this->leftSubTreap()) return false;
+      if (!this->leftSubTreap()->Remove(key)) this->setLeftSubTreap(nullptr);;
 
-      std::cout << "R" << std::endl; return this->rightSubTreap()->Remove(key);
+      return true;
+    } else {
+      if (!this->rightSubTreap()) return false;
+      if (!this->rightSubTreap()->Remove(key)) this->setRightSubTreap(nullptr);
+
+      return true;
+    }
   }
 
   template <typename C, typename T>
   std::vector<treap::NodePtr<C, T>> rut::Treap<C, T>::inOrderedVector() const noexcept {
     std::vector<treap::NodePtr<C, T>> result = std::vector<treap::NodePtr<C, T>>();
+
+    if (this->begin() == this->end()) return result;
 
     for (treap::Node<C, T>& currentNode : *this) {
       result.push_back(currentNode.ptr());
