@@ -1,0 +1,7 @@
+*.exe
+Dockerfile*
+.vscode
+.git
+.gitignore
+**/build
+token
