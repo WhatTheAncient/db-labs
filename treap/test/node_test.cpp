@@ -1,11 +1,13 @@
 #include <string>
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
 
 #include "../src/treap/node.hpp"
 #include "sample.hpp"
 
+using DataType = Sample;
+
 TEST(Node, DefaultConstructorWithIntegralType) {
-  auto defaultNode = treap::Node<uint32_t, Sample>();
+  auto defaultNode = treap::Node<uint32_t, DataType>();
 
   auto minVal = std::numeric_limits<uint32_t>::min();
   auto maxVal = std::numeric_limits<uint32_t>::max();
@@ -19,10 +21,10 @@ TEST(Node, DefaultConstructorWithIntegralType) {
 }
 
 TEST(Node, DefaultConstructorWithNotIntegralType) {
-  auto defaultNode = treap::Node<float_t, Sample>();
+  auto defaultNode = treap::Node<float, DataType>();
 
-  auto minVal = std::numeric_limits<float_t>::min();
-  auto maxVal = std::numeric_limits<float_t>::max();
+  auto minVal = std::numeric_limits<float>::min();
+  auto maxVal = std::numeric_limits<float>::max();
 
   bool keyInNumericLimits = minVal <= defaultNode.getKey() && defaultNode.getKey() <= maxVal;
   bool priorityInNumericLimits = minVal <= defaultNode.getPriority() && defaultNode.getPriority() <= maxVal;
@@ -37,7 +39,7 @@ TEST(Node, ParametrizedConstructor) {
   float priority = 10.312;
   Sample data("Some data");
 
-  auto parametrizedNode = treap::Node<float, Sample>(key, priority, data);
+  auto parametrizedNode = treap::Node<float, DataType>(key, priority, data);
 
   EXPECT_DOUBLE_EQ(key, parametrizedNode.getKey());
   EXPECT_DOUBLE_EQ(priority, parametrizedNode.getPriority());
@@ -50,8 +52,8 @@ TEST(Node, SpaceshipOperator) {
   float priority = 10.312;
   Sample data("Some data");
 
-  auto lessNode = treap::Node<float, Sample>(lessKey, priority, data);
-  auto greaterNode = treap::Node<float, Sample>(greaterKey, priority, data);
+  auto lessNode = treap::Node<float, DataType>(lessKey, priority, data);
+  auto greaterNode = treap::Node<float, DataType>(greaterKey, priority, data);
 
   EXPECT_EQ(lessNode <=> lessNode, 0);
   EXPECT_EQ(lessNode <=> greaterNode, -1);
@@ -63,8 +65,8 @@ TEST(Node, EquityOperator) {
   float priority = 10.312;
   Sample data("Some data");
 
-  auto firstNode = treap::Node<float, Sample>(key, priority, data);
-  auto secondNode = treap::Node<float, Sample>(key, (priority+12.1), Sample("Another data"));
+  auto firstNode = treap::Node<float, DataType>(key, priority, data);
+  auto secondNode = treap::Node<float, DataType>(key, (priority+12.1), Sample("Another data"));
 
   EXPECT_TRUE(firstNode == secondNode);
 }
@@ -72,8 +74,8 @@ TEST(Node, EquityOperator) {
 TEST(Node, hasLessPriorityThan) {
   auto key = 123;
   Sample data("Some data");
-  auto greaterPriorityNode = treap::Node<int16_t, Sample>(key, 3, data);
-  auto lessPriorityNode = treap::Node<int16_t, Sample>(key, 2, data);
+  auto greaterPriorityNode = treap::Node<int16_t, DataType>(key, 3, data);
+  auto lessPriorityNode = treap::Node<int16_t, DataType>(key, 2, data);
 
   EXPECT_TRUE(lessPriorityNode.hasLessPriorityThan(greaterPriorityNode));
   EXPECT_FALSE(lessPriorityNode.hasLessPriorityThan(lessPriorityNode));
@@ -82,8 +84,8 @@ TEST(Node, hasLessPriorityThan) {
 TEST(Node, hasGreaterPriorityThan) {
   auto key = 123;
   Sample data("Some data");
-  auto greaterPriorityNode = treap::Node<int16_t, Sample>(key, 3, data);
-  auto lessPriorityNode = treap::Node<int16_t, Sample>(key, 2, data);
+  auto greaterPriorityNode = treap::Node<int16_t, DataType>(key, 3, data);
+  auto lessPriorityNode = treap::Node<int16_t, DataType>(key, 2, data);
 
   EXPECT_TRUE(greaterPriorityNode.hasGreaterPriorityThan(lessPriorityNode));
   EXPECT_FALSE(greaterPriorityNode.hasGreaterPriorityThan(greaterPriorityNode));

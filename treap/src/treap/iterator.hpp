@@ -1,10 +1,9 @@
-#include <iterator>
+#pragma once
+
 #include <cstddef>
 #include <stack>
 #include <optional>
 #include <memory>
-
-#include "../treap.hpp"
 
 namespace rut { template<typename C, typename T> class Treap; };
 

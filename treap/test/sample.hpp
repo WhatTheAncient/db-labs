@@ -4,8 +4,8 @@
 
 class Sample {
   private:
-    std::string name;
   public:
+    std::string name;
     Sample() = default;
     Sample(std::string name): name(std::move(name)){};
     Sample(const Sample& other): name(other.name) {};

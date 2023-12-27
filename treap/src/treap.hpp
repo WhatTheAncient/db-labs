@@ -181,7 +181,7 @@ namespace rut {
        */
       treap::Iterator<C, T> end() const;
 
-      friend bool operator==(rut::Treap<C, T>& lha, rut::Treap<C, T>& rha) {      
+      friend bool operator==(const rut::Treap<C, T>& lha, const rut::Treap<C, T>& rha) {      
         auto lhaVector = lha.inOrderedVector();
         auto rhaVector = rha.inOrderedVector();
         
@@ -243,18 +243,19 @@ namespace rut {
 
   template <typename C, typename T>
   TreapPtr<C, T> Treap<C, T>::Merge(TreapPtr<C, T> other) {
+    return merge(this->ptr(), other);
     if (!other) return ptr();
     if (!root) return other->ptr();
 
-    if (getRoot()->hasGreaterPriorityThan(*other->getRoot())) {
-      setRightSubTreap(rightSubTreap()->Merge(other));
+    // if (getRoot()->hasGreaterPriorityThan(*other->getRoot())) {
+    //   setRightSubTreap(rightSubTreap()->Merge(other));
 
-      return ptr();
-    } else {
-      setLeftSubTreap(Merge(other->leftSubTreap()));
+    //   return ptr();
+    // } else {
+    //   setLeftSubTreap(Merge(other->leftSubTreap()));
 
-      return other->ptr();
-    }
+    //   return other->ptr();
+    // }
   };
 
   template <typename C, typename T>

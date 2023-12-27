@@ -1,5 +1,7 @@
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
+
 #include "node_test.cpp"
+#include "iterator_test.cpp"
 #include "treap_test.cpp"
 
 int main(int argc, char **argv)

@@ -1,82 +1,107 @@
-#include <string>
-#include <vector>
-#include "gtest/gtest.h"
-
+#include <gtest/gtest.h>
 #include "../src/treap.hpp"
 #include "sample.hpp"
 
-using TreapWithSample = rut::Treap<uint32_t, Sample>;
-using NodeWithSample = treap::Node<uint32_t, Sample>;
+using KeyType = int;
+using DataType = Sample;
 
-TEST(Treap, DefaultConstructor) {
-  auto defaultTreap = TreapWithSample();
+TEST(TreapTest, DefaultConstructor) {
+    rut::Treap<KeyType, DataType> treap;
 
-  EXPECT_TRUE(defaultTreap.getRoot() == nullptr);
-  EXPECT_TRUE(defaultTreap.leftSubTreap() == nullptr);
-  EXPECT_TRUE(defaultTreap.rightSubTreap() == nullptr);
-};
-
-TEST(Treap, CopyConstructor) {
-  auto copySrc = TreapWithSample();
-  auto copy = TreapWithSample(copySrc);
-
-  EXPECT_TRUE(copy == copySrc);
+    ASSERT_EQ(treap.getRoot(), nullptr);
 }
 
-TEST(Treap, InsertInEmptyTreap) {
-  auto emptyTreap = TreapWithSample();
-  auto key = 2;
-  auto priority = 3;
-  auto data = Sample("Some");
+TEST(TreapTest, CopyConstructor) {
+  rut::Treap<KeyType, DataType> originalTreap;
+  originalTreap.Insert(5, 10, Sample("Node 5"));
+  originalTreap.Insert(3, 8, Sample("Node 3"));
+  originalTreap.Insert(7, 15, Sample("Node 7"));
 
-  emptyTreap.Insert(key, priority, data);
-  
-  EXPECT_TRUE(emptyTreap.getRoot()->getKey() == key);
-  EXPECT_TRUE(emptyTreap.getRoot()->getPriority() == priority);
-  EXPECT_TRUE(emptyTreap.getRoot()->getData() == data);
+  rut::Treap<KeyType, DataType> copiedTreap(originalTreap);
+
+  ASSERT_EQ(originalTreap, copiedTreap);
 }
 
-TEST(Treap, InsertWithLessKeyAndPriority) {
-  auto emptyTreap = TreapWithSample();
-  auto key = 2, lessKey = 1;
-  auto priority = 3, lessPriority = 2;
-  auto data = Sample("Some"), otherData = Sample("Other");
+TEST(TreapTest, Split) {
+    rut::Treap<KeyType, DataType> treap;
+    treap.Insert(5, 10, Sample("Node 5"));
+    treap.Insert(3, 8, Sample("Node 3"));
+    treap.Insert(7, 15, Sample("Node 7"));
+    treap.Insert(2, 12, Sample("Node 2"));
 
-  emptyTreap.Insert(key, priority, data);
-  emptyTreap.Insert(lessKey, lessPriority, otherData);
-  
-  EXPECT_TRUE(emptyTreap.leftSubTreap()->getRoot()->getKey() == lessKey);
-  EXPECT_TRUE(emptyTreap.leftSubTreap()->getRoot()->getPriority() == lessPriority);
-  EXPECT_TRUE(emptyTreap.leftSubTreap()->getRoot()->getData() == otherData);
+    auto [left, right] = treap.Split(4);
+
+    ASSERT_EQ(left->inOrderedVector().size(), 2);
+    ASSERT_EQ(left->inOrderedVector()[0]->getData(), Sample("Node 2"));
+    ASSERT_EQ(left->inOrderedVector()[1]->getData(), Sample("Node 3"));
+
+    ASSERT_EQ(right->inOrderedVector().size(), 2);
+    ASSERT_EQ(right->inOrderedVector()[0]->getData(), Sample("Node 5"));
+    ASSERT_EQ(right->inOrderedVector()[1]->getData(), Sample("Node 7"));
 }
 
-TEST(Treap, InsertWithLessKeyAndGreaterPriority) {
-  auto emptyTreap = TreapWithSample();
-  auto key = 2, greaterKey = 3;
-  auto priority = 3, lessPriority = 2;
-  auto data = Sample("Some"), otherData = Sample("Other");
+TEST(TreapTest, Merge) {
+    auto node1 = std::make_shared<treap::Node<int, Sample>>(1, 10, Sample("Node 1"));
+    auto node2 = std::make_shared<treap::Node<int, Sample>>(2, 20, Sample("Node 2"));
+    auto node3 = std::make_shared<treap::Node<int, Sample>>(3, 30, Sample("Node 3"));
+    auto node4 = std::make_shared<treap::Node<int, Sample>>(4, 40, Sample("Node 4"));
 
-  emptyTreap.Insert(key, priority, data);
-  emptyTreap.Insert(greaterKey, lessPriority, otherData);
-  
-  EXPECT_TRUE(emptyTreap.rightSubTreap()->getRoot()->getKey() == greaterKey);
-  EXPECT_TRUE(emptyTreap.rightSubTreap()->getRoot()->getPriority() == lessPriority);
-  EXPECT_TRUE(emptyTreap.rightSubTreap()->getRoot()->getData() == otherData);
+    auto treap1 = std::make_shared<rut::Treap<int, Sample>>();
+    treap1->Insert(1, 10, Sample("Node 1"));
+
+    auto treap2 = std::make_shared<rut::Treap<int, Sample>>();
+    treap2->Insert(2, 20, Sample("Node 2"));
+
+    auto treap3 = std::make_shared<rut::Treap<int, Sample>>();
+    treap3->Insert(3, 30, Sample("Node 3"));
+
+    auto treap4 = std::make_shared<rut::Treap<int, Sample>>();
+    treap4->Insert(4, 40, Sample("Node 4"));
+
+    auto mergedTreap = merge(merge(merge(treap1, treap2), treap3), treap4);
+    auto orderedNodes = mergedTreap->inOrderedVector();
+
+    ASSERT_EQ(orderedNodes.size(), 4);
+    EXPECT_EQ(orderedNodes[0]->getKey(), 1);
+    EXPECT_EQ(orderedNodes[1]->getKey(), 2);
+    EXPECT_EQ(orderedNodes[2]->getKey(), 3);
+    EXPECT_EQ(orderedNodes[3]->getKey(), 4);
 }
 
-TEST(Treap, InsertWithGreaterKeyAndPriority) {
-  auto emptyTreap = TreapWithSample();
-  auto key = 2, greaterKey = 3;
-  auto priority = 3, greaterPriority = 4;
-  auto data = Sample("Some"), otherData = Sample("Other");
+TEST(TreapTest, Insert) {
+    rut::Treap<KeyType, DataType> treap;
 
-  emptyTreap.Insert(key, priority, data);
-  emptyTreap.Insert(greaterKey, greaterPriority, otherData);
-  
-  EXPECT_TRUE(emptyTreap.getRoot()->getKey() == greaterKey);
-  EXPECT_TRUE(emptyTreap.getRoot()->getPriority() == greaterPriority);
-  EXPECT_TRUE(emptyTreap.getRoot()->getData() == otherData);
-  EXPECT_TRUE(emptyTreap.leftSubTreap()->getRoot()->getKey() == key);
-  EXPECT_TRUE(emptyTreap.leftSubTreap()->getRoot()->getPriority() == priority);
-  EXPECT_TRUE(emptyTreap.leftSubTreap()->getRoot()->getData() == data);
+    treap.Insert(5, 10, Sample("Node 5"));
+    treap.Insert(3, 8, Sample("Node 3"));
+    treap.Insert(7, 15, Sample("Node 7"));
+
+    ASSERT_EQ(treap.inOrderedVector().size(), 3);
+    ASSERT_EQ(treap.inOrderedVector()[0]->getData(), Sample("Node 3"));
+    ASSERT_EQ(treap.inOrderedVector()[1]->getData(), Sample("Node 5"));
+    ASSERT_EQ(treap.inOrderedVector()[2]->getData(), Sample("Node 7"));
+}
+
+TEST(TreapTest, Find) {
+    rut::Treap<KeyType, DataType> treap;
+    treap.Insert(5, 10, Sample("Node 5"));
+    treap.Insert(3, 8, Sample("Node 3"));
+    treap.Insert(7, 15, Sample("Node 7"));
+
+    auto foundNode = treap.Find(3);
+
+    ASSERT_TRUE(foundNode != nullptr);
+    ASSERT_EQ(foundNode->getData(), Sample("Node 3"));
+}
+
+TEST(TreapTest, Remove) {
+    rut::Treap<KeyType, DataType> treap;
+    treap.Insert(5, 10, Sample("Node 5"));
+    treap.Insert(3, 8, Sample("Node 3"));
+    treap.Insert(7, 15, Sample("Node 7"));
+
+    ASSERT_TRUE(treap.Remove(3));
+
+    ASSERT_EQ(treap.inOrderedVector().size(), 2);
+    ASSERT_EQ(treap.inOrderedVector()[0]->getData(), Sample("Node 5"));
+    ASSERT_EQ(treap.inOrderedVector()[1]->getData(), Sample("Node 7"));
 }
