@@ -64,7 +64,6 @@ namespace treap {
       C getKey() const noexcept { return this->key; };
       C getPriority() const noexcept { return this->priority; };
       T getData() const noexcept { return this->data; };
-      NodePtr<C, T> getParent() const noexcept { return this->parent; };
 
       NodePtr<C, T> ptr() { return this->shared_from_this(); };
       
@@ -113,16 +112,10 @@ namespace treap {
 
     this->key = dis(gen);
     this->priority = dis(gen);
-    this->data = T{};
-
   }
 
   template <typename C, typename T>
-  Node<C, T>::Node(C key, C priority, T data) {
-    this->key = key;
-    this->priority = priority;
-    this->data = data;
-  };
+  Node<C, T>::Node(C key, C priority, T data) : key{key}, priority{priority}, data{data} {};
 
   template <typename C, typename T>
   bool Node<C, T>::hasLessPriorityThan(const Node<C, T> &other) const {

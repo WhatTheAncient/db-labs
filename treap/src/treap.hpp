@@ -215,47 +215,15 @@ namespace rut {
 
   template <typename C, typename T>
   SubTreaps<C, T> Treap<C, T>::Split(C separator) const {
-    if (!root) return std::make_pair(nullptr, nullptr);
-
     // IDK how to disallow instance mutation in other way, sorry :<
     TreapPtr<C, T> thisCopy = std::make_shared<Treap<C, T>>(*this);
 
-    if (separator >= root->getKey()) {
-      if (rightSubTreap()) {
-        SubTreaps<C, T> result = thisCopy->rightSubTreap()->Split(separator);
-        thisCopy->setRightSubTreap(result.first);
-
-        return {thisCopy->ptr(), result.second};
-      } else {
-        return {thisCopy->ptr(), nullptr};
-      }
-    } else {
-      if (leftSubTreap()) {
-        SubTreaps<C, T> result = thisCopy->leftSubTreap()->Split(separator);
-        thisCopy->setLeftSubTreap(result.second);
-
-        return {result.first, thisCopy->ptr()};
-      } else {
-        return {nullptr, thisCopy->ptr()};
-      }
-    }
+    return split(thisCopy, separator);
   }
 
   template <typename C, typename T>
   TreapPtr<C, T> Treap<C, T>::Merge(TreapPtr<C, T> other) {
-    return merge(this->ptr(), other);
-    if (!other) return ptr();
-    if (!root) return other->ptr();
-
-    // if (getRoot()->hasGreaterPriorityThan(*other->getRoot())) {
-    //   setRightSubTreap(rightSubTreap()->Merge(other));
-
-    //   return ptr();
-    // } else {
-    //   setLeftSubTreap(Merge(other->leftSubTreap()));
-
-    //   return other->ptr();
-    // }
+    return merge(ptr(), other);
   };
 
   template <typename C, typename T>
@@ -273,24 +241,24 @@ namespace rut {
     auto newRight = merge(result, right);    
     result = merge(left, newRight);
 
-    this->setRoot(result->getRoot());
-    this->setLeftSubTreap(result->leftSubTreap());
-    this->setRightSubTreap(result->rightSubTreap());
+    setRoot(result->getRoot());
+    setLeftSubTreap(result->leftSubTreap());
+    setRightSubTreap(result->rightSubTreap());
   }
 
   template <typename C, typename T>
   treap::NodePtr<C, T> Treap<C, T>::Find(const C key) const {
-    if (this->getRoot() == nullptr) return nullptr;
-    if (this->getRoot()->getKey() == key) return this->getRoot();
+    if (getRoot() == nullptr) return nullptr;
+    if (getRoot()->getKey() == key) return getRoot();
 
-    if (std::greater{}(this->getRoot()->getKey(), key)) {
-      if (!this->leftSubTreap()) return nullptr;
+    if (std::greater{}(getRoot()->getKey(), key)) {
+      if (!leftSubTreap()) return nullptr;
 
-      return this->leftSubTreap()->Find(key);
+      return leftSubTreap()->Find(key);
     } else {
-      if (!this->rightSubTreap()) return nullptr;
+      if (!rightSubTreap()) return nullptr;
 
-      return this->rightSubTreap()->Find(key);
+      return rightSubTreap()->Find(key);
     }
   }
 
@@ -298,32 +266,32 @@ namespace rut {
   bool Treap<C, T>::Remove(const C key) {
     if (Find(key) == nullptr) return false;
 
-    if (this->getRoot() == nullptr) {
+    if (getRoot() == nullptr) {
       return false;
     } 
 
-    if (this->getRoot()->getKey() == key) {
-      auto replace = merge(this->leftSubTreap(), this->rightSubTreap());
+    if (getRoot()->getKey() == key) {
+      auto replace = merge(leftSubTreap(), rightSubTreap());
 
       if (replace == nullptr) {
         return false;
       } else {
-        this->setRoot(replace->getRoot());
-        this->setLeftSubTreap(replace->leftSubTreap());
-        this->setRightSubTreap(replace->rightSubTreap());
+        setRoot(replace->getRoot());
+        setLeftSubTreap(replace->leftSubTreap());
+        setRightSubTreap(replace->rightSubTreap());
 
         return true;
       }
     }
 
-    if (std::greater{}(this->getRoot()->getKey(), key)) {
-      if (!this->leftSubTreap()) return false;
-      if (!this->leftSubTreap()->Remove(key)) this->setLeftSubTreap(nullptr);;
+    if (std::greater{}(getRoot()->getKey(), key)) {
+      if (!leftSubTreap()) return false;
+      if (!leftSubTreap()->Remove(key)) setLeftSubTreap(nullptr);;
 
       return true;
     } else {
-      if (!this->rightSubTreap()) return false;
-      if (!this->rightSubTreap()->Remove(key)) this->setRightSubTreap(nullptr);
+      if (!rightSubTreap()) return false;
+      if (!rightSubTreap()->Remove(key)) setRightSubTreap(nullptr);
 
       return true;
     }
@@ -333,7 +301,7 @@ namespace rut {
   std::vector<treap::NodePtr<C, T>> rut::Treap<C, T>::inOrderedVector() const noexcept {
     std::vector<treap::NodePtr<C, T>> result = std::vector<treap::NodePtr<C, T>>();
 
-    if (this->begin() == this->end()) return result;
+    if (begin() == end()) return result;
 
     for (treap::Node<C, T>& currentNode : *this) {
       result.push_back(currentNode.ptr());
